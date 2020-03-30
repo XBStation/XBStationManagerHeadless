@@ -1,0 +1,79 @@
+#! /bin/sh
+# /etc/init.d/%fileName
+
+# Some things that run always
+
+xbStationManagerDir=%appDir
+xbStationManagerName=%xbStationManagerName
+xbStationManagerPath=$(printf "sudo %s%s" "$xbStationManagerDir" "$xbStationManagerName")
+xbstationPath=$(printf "sudo %s/XBFirms/XBFirm.sh" "$xbStationManagerDir")
+
+# Carry out specific functions when asked to by the system
+case "$1" in
+  run)
+    sudo XBFirm.sh "$@"
+    ;;
+  disable-autostart)
+    sudo systemctl disable xbstation.service
+    sudo systemctl stop xbstation.service
+    ;;
+  enable-autostart)
+    sudo systemctl enable xbstation.service
+    sudo systemctl start xbstation.service
+    ;;
+  stop)
+    sudo systemctl kill xbstation.service
+    echo "stopped"
+    ;;
+  status)
+    sudo systemctl status xbstation.service
+    ;;
+  setup)
+    $xbStationManagerPath
+    ;;
+  restart)
+    echo "stopping"
+    sudo systemctl kill xbstation.service
+    echo "stopped"
+    echo "starting"
+    sudo systemctl kill xbstation.service
+    sudo systemctl enable xbstation.service
+    sudo systemctl start xbstation.service
+    echo "started"
+    ;;
+  start)
+	sudo systemctl stop xbstation.service
+    sudo systemctl enable xbstation.service
+    sudo systemctl start xbstation.service
+    echo "started"
+    ;;
+  autostart)
+    _IP=$(hostname -I) 
+    while [ -z "$_IP" ] 
+    do 
+    _IP=$(hostname -I) 
+    done
+    echo "Done"
+    %nohupXBStationManager
+    %nohupXBStation
+    ;;
+  vision-start)
+    sudo LD_LIBRARY_PATH=%trackTargetPath %visionScript --config %visionConfigPath
+    echo "Vision Landing Started"
+    ;;
+  vision-stop)
+    sudo systemctl kill vision-landing.service
+    ;;
+  version)
+    %versionScript
+    ;;
+  connection)
+    %connectionScript $3 $4
+    ;;
+  *)
+    echo "Usage: /etc/init.d/%fileName {start|stop|enable-autostart|disable-autostart|status|restart|setup}"
+    exit 1
+    ;;
+esac
+
+exit 0

@@ -1,0 +1,12 @@
+[Unit]
+
+Description=XBStation
+
+[Service]
+Restart=always
+RestartSec=5
+ExecStart=/etc/init.d/XBStation autostart
+
+[Install]
+
+WantedBy=default.target
